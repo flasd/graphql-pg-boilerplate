@@ -1,0 +1,21 @@
+type Post {
+  id: ID!
+  title: String!
+  body: String!
+  author: Author!
+}
+
+input CreatePostInput {
+  title: String!
+  body: String!
+  author: ID!
+}
+
+type Query {
+  posts: [Post!]!
+  post(id: ID!): Post
+}
+
+type Mutation {
+  createPost(input: CreatePostInput): Post! @hasRole(roles: [creator])
+}

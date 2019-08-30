@@ -6,6 +6,8 @@ const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const withGraphql = require('./graphql');
 const database = require('./database');
+const authMiddleware = require('./middleware/auth');
+const errorMiddleware = require('./middleware/error-handler');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,14 +27,20 @@ if (process.env.NODE_ENV === 'development') {
 app.use(helmet());
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(cors(corsConfig));
+app.use(authMiddleware);
+app.use(errorMiddleware);
 
-withGraphql(app, { database });
+const httpServer = withGraphql(app, { database });
 
 
 function onReady() {
-  console.info(`Node App running on port ${PORT}!`);
+  console.info(`Started server at ${new Date().toISOString()} in port ${PORT}!`);
 }
 
-const server = app.listen(PORT, onReady);
+httpServer.listen(PORT, onReady);
 
-gracefulShutdown(server);
+gracefulShutdown(httpServer, {
+  finally: () => {
+    console.info(`Server stopped at ${new Date().toISOString()}`)
+  }
+});

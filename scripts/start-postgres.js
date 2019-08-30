@@ -25,6 +25,10 @@ async function main() {
     PASSWORD ${process.env.POSTGRES_PASSWORD}
     DOCKER_ID ${result.stdout}`);
   }
+
+  console.info(`For creating and migrating your database, run:
+  'yarn run sequelize db:create && yarn run sequelize db:migrate'
+`);
 }
 
 main();

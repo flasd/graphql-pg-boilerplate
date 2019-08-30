@@ -1,7 +1,13 @@
 const path = require('path');
+const http = require('http');
+const get = require('lodash.get');
+const cookie = require('cookie');
 const { fileLoader, mergeTypes, mergeResolvers } = require('merge-graphql-schemas');
-const { ApolloServer } = require('apollo-server-express');
-const { IsAuthenticatedDirective, HasRoleDirective, HasScopeDirective } = require('graphql-auth-directives');
+const { IsAuthenticatedDirective } = require('graphql-auth-directives');
+const {
+  ApolloServer, ApolloError, AuthenticationError, UserInputError,
+} = require('apollo-server-express');
+const { verifyAndUnpack } = require('../services/auth');
 
 const SCHEMAS_GLOB = path.join(__dirname, './**/*.schema.gql');
 const RESOLVERS_GLOB = path.join(__dirname, './**/*.js');
@@ -9,21 +15,51 @@ const DIRECTIVES_SCHEMA_GLOB = path.join(__dirname, './**/*.directive.gql');
 const DIRECTIVES_CLASS_GLOB = path.join(__dirname, './**/*.directive.js');
 
 function createContext(partialContext = {}) {
-  return ({ req, res }) => {
-    // get JWT parts from cookies
-    const { JWT_PAYLOAD, JWT_SIGNATURE } = req.cookies;
+  return ({ req, res, connection }) => {
+    if (connection) {
+      return {
+        ...connection.context,
+        ...partialContext,
+      };
+    }
 
-    // graph-auth-directives uses a header object.
-    const headers = {
-      Authorization: `${JWT_PAYLOAD}.${JWT_SIGNATURE}`,
-    };
-
-    return {
+    const context = {
       req,
       res,
-      headers,
+      headers: req.headers,
+      user: req.user,
       ...partialContext,
     };
+
+    return context;
+  };
+}
+
+function formatError(error) {
+  if (process.env.NODE_ENV === 'development') {
+    console.error(error);
+
+  }
+  if (
+    error instanceof ApolloError
+    || error instanceof AuthenticationError
+    || error instanceof UserInputError
+    || get(error, ['extensions', 'exception', 'name'], false) === 'AuthorizationError'
+  ) {
+    return error;
+  }
+
+  console.error(error);
+  return new Error('Something went wrong.');
+}
+
+function onConnect(params, ws, context) {
+  const { request: { headers: { cookie: rawCookies } } } = context;
+
+  const { JWT_PAYLOAD, JWT_SIGNATURE } = cookie.parse(rawCookies);
+
+  return {
+    user: verifyAndUnpack(JWT_PAYLOAD, JWT_SIGNATURE),
   };
 }
 
@@ -42,15 +78,17 @@ function withGraphql(app, partialContext) {
       ...(fileLoader(DIRECTIVES_CLASS_GLOB)),
     ])),
     isAuthenticated: IsAuthenticatedDirective,
-    hasRole: HasRoleDirective,
-    hasScope: HasScopeDirective,
   };
 
   const apollo = new ApolloServer({
     typeDefs,
     resolvers,
     schemaDirectives,
+    subscriptions: {
+      onConnect,
+    },
     context: createContext(partialContext),
+    formatError,
     playground: process.env.NODE_ENV === 'development' && {
       settings: {
         'request.credentials': 'include',
@@ -58,11 +96,16 @@ function withGraphql(app, partialContext) {
     },
   });
 
-  return apollo.applyMiddleware({
+  apollo.applyMiddleware({
     app,
     cors: false,
-    disableHealthCheck: true,
   });
+
+  const httpServer = http.createServer(app);
+
+  apollo.installSubscriptionHandlers(httpServer);
+
+  return httpServer;
 }
 
 module.exports = withGraphql;

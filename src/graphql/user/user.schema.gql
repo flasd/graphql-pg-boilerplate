@@ -1,0 +1,24 @@
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  createdAt: DateTime!
+  updateAt: DateTime
+}
+
+input CreateAccountInput {
+  name: String!
+  email: EmailAddress!
+  password: String!
+}
+
+type Query {
+  currentUser: User! @isAuthenticated
+}
+
+type Mutation {
+  createAccount(input: CreateAccountInput!): Boolean!
+  login(email: EmailAddress!, password: String!): Boolean!
+  logout: Boolean!
+  removeAccount: Boolean! @isAuthenticated
+}

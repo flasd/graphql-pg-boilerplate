@@ -10,7 +10,6 @@ function verifyAndUnpack(jwtPayload, jwtSignature) {
   try {
     const decoded = jsonWebToken.verify(JWT_TOKEN, process.env.JWT_SECRET);
 
-
     return [{
       ...decoded,
     }, JWT_TOKEN];

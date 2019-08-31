@@ -41,6 +41,6 @@ httpServer.listen(PORT, onReady);
 
 gracefulShutdown(httpServer, {
   finally: () => {
-    console.info(`Server stopped at ${new Date().toISOString()}`)
-  }
+    console.info(`Server stopped at ${new Date().toISOString()}`);
+  },
 });

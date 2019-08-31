@@ -38,8 +38,8 @@ function createContext(partialContext = {}) {
 function formatError(error) {
   if (process.env.NODE_ENV === 'development') {
     console.error(error);
-
   }
+
   if (
     error instanceof ApolloError
     || error instanceof AuthenticationError
@@ -49,7 +49,10 @@ function formatError(error) {
     return error;
   }
 
-  console.error(error);
+  if (process.env.NODE_ENV !== 'development') {
+    console.error(error);
+  }
+
   return new Error('Something went wrong.');
 }
 

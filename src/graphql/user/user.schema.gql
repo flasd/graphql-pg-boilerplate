@@ -2,6 +2,7 @@ type User {
   id: ID!
   name: String!
   email: String!
+  emailVerified: Boolean!
   createdAt: DateTime!
   updateAt: DateTime
 }
@@ -18,7 +19,10 @@ type Query {
 
 type Mutation {
   createAccount(input: CreateAccountInput!): Boolean!
+  confirmEmail(confirmationToken: String!): Boolean!
   login(email: EmailAddress!, password: String!): Boolean!
+  sendPasswordRecoveryEmail(email: EmailAddress!): Boolean!
+  recoverPassword(recoveryToken: String!, password: String!): Boolean!
   logout: Boolean!
-  removeAccount: Boolean! @isAuthenticated
+  removeAccount(password: String!): Boolean! @isAuthenticated
 }

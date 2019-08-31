@@ -1,7 +1,7 @@
-const jsonWebToken = require('jsonwebtoken');
 const yup = require('yup');
 const { ApolloError } = require('apollo-server-express');
 const srs = require('secure-random-string');
+const { emitToken, resetToken } = require('../../services/auth');
 const validate = require('../../services/validate');
 const sendEmail = require('../../services/email');
 
@@ -142,26 +142,7 @@ async function login(parent, args, context) {
     throw error;
   }
 
-  const token = jsonWebToken.sign(
-    {
-      id: user.id,
-      email,
-    },
-    process.env.JWT_SECRET,
-    {
-      expiresIn: '60 hours',
-    },
-  ).split('.');
-
-  res.cookie('JWT_PAYLOAD', `${token[0]}.${token[1]}`, {
-    maxAge: 1000 * 60 * 60 * 60,
-  });
-
-  res.cookie('JWT_SIGNATURE', token[2], {
-    httpOnly: true,
-    maxAge: 1000 * 60 * 60 * 60,
-    secure: process.env.NODE_ENV === 'production',
-  });
+  emitToken(res, user);
 
   return true;
 }
@@ -262,16 +243,7 @@ async function recoverPassword(parent, args, context) {
 async function logout(parent, args, context) {
   const { res } = context;
 
-
-  res.cookie('JWT_PAYLOAD', '', {
-    maxAge: 0,
-  });
-
-  res.cookie('JWT_SIGNATURE', '', {
-    httpOnly: true,
-    maxAge: 0,
-    secure: process.env.NODE_ENV !== 'development',
-  });
+  resetToken(res);
 
   return true;
 }

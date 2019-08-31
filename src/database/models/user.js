@@ -30,6 +30,14 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(127),
     },
 
+    emailVerified: {
+      allowNull: false,
+      type: DataTypes.BOOLEAN,
+      defaultValue() {
+        return false;
+      },
+    },
+
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE,
@@ -65,11 +73,17 @@ module.exports = (sequelize, DataTypes) => {
 
   const user = sequelize.define(tableName, columns, metadata);
 
-  user.associate = (/* models */) => {
-    // User.hasMany(models.something, {
-    //   foreignKey: { name: 'user_id' },
-    //   allowNull: false,
-    // });
+  user.associate = (models) => {
+    user.hasOne(models.emailConfirmationToken, {
+      foreignKey: { name: 'userId' },
+      foreignKeyConstraint: true,
+      allowNull: false,
+    });
+    user.hasOne(models.passwordRecoveryToken, {
+      foreignKey: { name: 'userId' },
+      foreignKeyConstraint: true,
+      allowNull: false,
+    });
   };
 
   // cannot be arrow function because of the 'this' binding

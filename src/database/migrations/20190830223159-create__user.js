@@ -25,6 +25,11 @@ module.exports = {
         type: Sequelize.STRING(127),
       },
 
+      emailVerified: {
+        allowNull: false,
+        type: Sequelize.BOOLEAN,
+      },
+
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

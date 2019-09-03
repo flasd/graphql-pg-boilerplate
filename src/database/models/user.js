@@ -38,6 +38,11 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
 
+    role: {
+      allowNull: false,
+      type: DataTypes.ENUM('admin', 'user'),
+    },
+
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE,
@@ -79,7 +84,20 @@ module.exports = (sequelize, DataTypes) => {
       foreignKeyConstraint: true,
       allowNull: false,
     });
+
     user.hasOne(models.passwordRecoveryToken, {
+      foreignKey: { name: 'userId' },
+      foreignKeyConstraint: true,
+      allowNull: false,
+    });
+
+    user.hasOne(models.userPagarme, {
+      foreignKey: { name: 'userId' },
+      foreignKeyConstraint: true,
+      allowNull: false,
+    });
+
+    user.hasMany(models.userSubscription, {
       foreignKey: { name: 'userId' },
       foreignKeyConstraint: true,
       allowNull: false,

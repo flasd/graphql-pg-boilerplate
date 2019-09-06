@@ -36,6 +36,9 @@ const httpServer = withGraphql(
   { database, payment },
 );
 
+app.all('*', (req, res) => {
+  res.status(404).send('here be dragons');
+});
 
 function onReady() {
   console.info(`Started server at ${new Date().toISOString()} in port ${PORT}!`);

@@ -1,5 +1,7 @@
 {
   "events": {
-    "start": "node scripts/clear-console.js && yarn lint"
-  }
+    "start": "node scripts/on-nodemon-restart.js"
+  },
+  "restartable": "rr",
+  "watch": ["src/**/*"]
 }

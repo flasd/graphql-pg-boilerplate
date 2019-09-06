@@ -1,0 +1,29 @@
+# import { AddressInput, CardInput } from '../payment.schema.gql';
+
+type Subscription {
+  id: ID!
+  plan: Plan!
+  card: Card!
+  transactions: [Purchase!]!
+}
+
+input SubscriptionUpdateInput {
+  id: ID!
+  plan: ID
+  card: ID
+}
+
+type Query {
+  getSubscription(id: ID!): Subscription!
+  listSubscriptions: [Subscription!]!
+}
+
+type Mutation {
+  subscribe(
+    planId: ID!
+    card: CardInput!
+    address: AddressInput!
+  ): Subscription!
+  updateSubscription(input: SubscriptionUpdateInput!): Subscription!
+  cancelSubscription(id: ID!): Boolean!
+}

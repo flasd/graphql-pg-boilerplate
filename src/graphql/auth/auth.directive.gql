@@ -1,7 +1,8 @@
-# enum Role {
-#   user
-# }
+enum Role {
+  user
+  admin
+}
 
 directive @hasScope(scopes: [String]) on OBJECT | FIELD_DEFINITION
-# directive @hasRole(roles: [String]) on OBJECT | FIELD_DEFINITION
+directive @hasRole(roles: [Role]) on OBJECT | FIELD_DEFINITION
 directive @isAuthenticated on OBJECT | FIELD_DEFINITION

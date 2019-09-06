@@ -1,0 +1,43 @@
+enum Recurrence {
+  monthly
+  bimonthly
+  quarterly
+  semesterly
+  annually
+}
+
+
+type Plan {
+  id: ID!
+  name: String!
+  amount: Int!
+  recurrence: Recurrence!
+  installments: Int!
+  trial: Int!
+}
+
+
+input CreatePlanInput {
+  name: String!
+  amount: Int!
+  recurrence: Recurrence!
+  installments: Int
+  trial: Int
+}
+
+input UpdatePlanInput {
+  id: ID!
+  name: String
+  trial: Int
+}
+
+
+type Query {
+  # Does't require auth by default
+  listPlans: [Plan!]!
+}
+
+type Mutation {
+  createPlan(input: CreatePlanInput!): Plan! @isAuthenticated @hasRole(roles: [admin])
+  updatePlan(input: UpdatePlanInput!): Plan! @isAuthenticated @hasRole(roles: [admin])
+}

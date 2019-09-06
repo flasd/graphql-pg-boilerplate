@@ -4,10 +4,12 @@ const gracefulShutdown = require('http-graceful-shutdown');
 const cors = require('cors');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
+// const fetchAuthManager = require('fetch-auth-manager/server').default;
 const withGraphql = require('./graphql');
 const database = require('./database');
 const authMiddleware = require('./middleware/auth');
 const errorMiddleware = require('./middleware/error-handler');
+const payment = require('./services/payment');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,12 +27,16 @@ if (process.env.NODE_ENV === 'development') {
 
 
 app.use(helmet());
+// app.use(fetchAuthManager());
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(cors(corsConfig));
 app.use(authMiddleware);
 app.use(errorMiddleware);
 
-const httpServer = withGraphql(app, { database });
+const httpServer = withGraphql(
+  app,
+  { database, payment },
+);
 
 
 function onReady() {

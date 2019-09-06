@@ -1,0 +1,33 @@
+# import { AddressInput, CardInput } from '../payment.schema.gql';
+
+type Purchase {
+  id: ID!
+  value: Int!
+  status: String!
+  refundedValue: Int
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+
+input ChargeInput {
+  product: ID!
+  quantity: Int!
+  installments: Int
+}
+
+
+type Query {
+  getPurchase(id: ID!): Purchase!
+  listPurchases: [Purchase!]!
+}
+
+type Mutation {
+  purchaseProduct(
+    charge: ChargeInput!
+    card: CardInput!
+    address: AddressInput
+  ): Purchase! @isAuthenticated
+
+  refundPurchase(id: ID!): Boolean! @isAuthenticated
+}

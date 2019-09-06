@@ -1,6 +1,6 @@
 const path = require('path');
 const http = require('http');
-const get = require('lodash.get');
+const { get } = require('lodash');
 const cookie = require('cookie');
 const { fileLoader, mergeTypes, mergeResolvers } = require('merge-graphql-schemas');
 const { IsAuthenticatedDirective } = require('graphql-auth-directives');

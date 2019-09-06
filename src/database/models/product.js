@@ -1,38 +1,40 @@
 const uuid = require('uuid/v4');
 
 module.exports = (sequelize, DataTypes) => {
-  const tableName = 'userSubscription';
+  const tableName = 'product';
 
   const columns = {
     id: {
       allowNull: false,
       primaryKey: true,
       autoIncrement: false,
+      unique: true,
       type: DataTypes.UUID,
       defaultValue() {
         return uuid();
       },
     },
 
-    userId: {
+    name: {
       allowNull: false,
-      type: DataTypes.UUID,
-    },
-
-    subscriptionId: {
       type: DataTypes.STRING(127),
-      allowNull: false,
     },
 
-    subscriptionEnd: {
-      type: DataTypes.DATE,
+    unitPrice: {
       allowNull: false,
+      type: DataTypes.INTEGER,
+    },
+
+    tangible: {
+      allowNull: false,
+      type: DataTypes.BOOLEAN,
     },
 
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE,
     },
+
     updatedAt: {
       allowNull: true,
       type: DataTypes.DATE,
@@ -48,15 +50,11 @@ module.exports = (sequelize, DataTypes) => {
     tableName,
   };
 
-  const userSubscription = sequelize.define(tableName, columns, metadata);
+  const product = sequelize.define(tableName, columns, metadata);
 
-  userSubscription.associate = (models) => {
-    userSubscription.belongsTo(models.user, {
-      foreignKey: { name: 'userId' },
-      foreignKeyConstraint: true,
-      allowNull: false,
-    });
+  product.associate = (/* models */) => {
+    // Associate...
   };
 
-  return userSubscription;
+  return product;
 };

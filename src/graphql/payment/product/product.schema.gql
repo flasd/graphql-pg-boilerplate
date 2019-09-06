@@ -1,0 +1,37 @@
+type Product {
+  id: ID!
+  name: String!
+  unitPrice: Int!
+  tangible: Boolean!
+}
+
+input CreateProductInput {
+  name: String!
+  unitPrice: Int!
+  tangible: Boolean!
+}
+
+input UpdateProductInput {
+  id: ID!
+  name: String
+  unitPrice: Int
+  tangible: Boolean
+}
+
+type Query {
+  # Does't require auth by default
+  getProduct(id: ID!): Product!
+  listProducts: [Product!]!
+}
+
+type Mutation {
+  createProduct(input: CreateProductInput!): Product!
+    @isAuthenticated
+    @hasRole(roles: [admin])
+
+  updateProduct(input: UpdateProductInput!): Product!
+    @isAuthenticated
+    @hasRole(roles: [admin])
+
+  deleteProduct(id: ID!): Boolean @isAuthenticated @hasRole(roles: [admin])
+}

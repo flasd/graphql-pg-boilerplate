@@ -8,6 +8,7 @@ module.exports = {
         unique: true,
         type: Sequelize.UUID,
       },
+
       userId: {
         allowNull: false,
         onUpdate: 'cascade',
@@ -15,9 +16,30 @@ module.exports = {
         type: Sequelize.UUID,
         references: { model: 'user', key: 'id' },
       },
+
       subscriptionId: {
         allowNull: false,
         type: Sequelize.STRING(127),
+      },
+
+      subscriptionEnd: {
+        allowNull: false,
+        type: Sequelize.DATE,
+      },
+
+      createdAt: {
+        allowNull: false,
+        type: Sequelize.DATE,
+      },
+
+      updatedAt: {
+        allowNull: true,
+        type: Sequelize.DATE,
+      },
+
+      deletedAt: {
+        allowNull: true,
+        type: Sequelize.DATE,
       },
     }),
 

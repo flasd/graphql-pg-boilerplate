@@ -1,0 +1,13 @@
+input AddressInput {
+  zipcode: String!
+  neighborhood: String!
+  street: String!
+  streetNumber: String!
+  state: String!
+  city: String!
+}
+
+input CardInput {
+  id: String!
+  cvv: String!
+}

@@ -40,6 +40,7 @@ module.exports = {
           allowNull: false,
           type: Sequelize.DATE,
         },
+
         updatedAt: {
           allowNull: true,
           type: Sequelize.DATE,
@@ -67,11 +68,11 @@ module.exports = {
   },
 
   down: async (queryInterface) => {
-    await queryInterface.dropTable('user');
-
     await queryInterface
       .bulkDelete('user', {
         id: 'c9adb152-2e3d-4fea-b133-d12f22755546',
       }, {});
+
+    await queryInterface.dropTable('user');
   },
 };

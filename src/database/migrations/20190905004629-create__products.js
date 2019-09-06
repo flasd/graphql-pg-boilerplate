@@ -1,7 +1,7 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => queryInterface
-    .createTable('userPagarme', {
+    .createTable('product', {
       id: {
         allowNull: false,
         primaryKey: true,
@@ -9,17 +9,19 @@ module.exports = {
         type: Sequelize.UUID,
       },
 
-      userId: {
-        allowNull: false,
-        onUpdate: 'cascade',
-        onDelete: 'cascade',
-        type: Sequelize.UUID,
-        references: { model: 'user', key: 'id' },
-      },
-
-      pagarmeUserId: {
+      name: {
         allowNull: false,
         type: Sequelize.STRING(127),
+      },
+
+      unitPrice: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
+      },
+
+      tangible: {
+        allowNull: false,
+        type: Sequelize.BOOLEAN,
       },
 
       createdAt: {
@@ -38,5 +40,7 @@ module.exports = {
       },
     }),
 
-  down: (queryInterface) => queryInterface.dropTable('userPagarme'),
+  down: (queryInterface) => queryInterface
+    .dropTable('product')
+  ,
 };

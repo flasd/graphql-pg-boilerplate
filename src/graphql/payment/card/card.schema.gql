@@ -1,0 +1,16 @@
+type Card {
+  id: ID!
+  brand: String!
+  holderName: String!
+  lastDigits: String!
+  valid: Boolean!
+}
+
+type Query {
+  listCards: [Card!]! @isAuthenticated
+}
+
+type Mutation {
+  createCard(hash: String!, cpf: String!, phone: String!): Card!
+    @isAuthenticated
+}

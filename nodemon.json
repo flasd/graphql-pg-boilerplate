@@ -1,5 +1,5 @@
 {
   "events": {
-    "start": "node scripts/clear-console.js"
+    "start": "node scripts/clear-console.js && yarn lint"
   }
 }

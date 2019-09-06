@@ -1,7 +1,7 @@
 const yup = require('yup');
 const { ApolloError } = require('apollo-server-express');
 const srs = require('secure-random-string');
-const { emitToken, resetToken } = require('../../services/auth');
+const { createToken, logout: resetToken } = require('fetch-auth-manager/server');
 const validate = require('../../services/validate');
 const sendEmail = require('../../services/email');
 
@@ -31,6 +31,7 @@ async function createAccount(parent, args, context) {
         name,
         email,
         password,
+        role: 'user',
       }, { transaction: t });
 
       const emailConfirmationToken = await database.emailConfirmationToken.create({
@@ -142,7 +143,20 @@ async function login(parent, args, context) {
     throw error;
   }
 
-  emitToken(res, user);
+  const userPagarme = await database.userPagarme.findOne({
+    where: {
+      userId: user.id,
+    },
+  });
+
+  createToken(res, {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    emailVerified: user.emailVerified,
+    paymentId: userPagarme ? userPagarme.pagarmeUserId : undefined,
+  });
 
   return true;
 }

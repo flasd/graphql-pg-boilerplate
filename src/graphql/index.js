@@ -1,13 +1,12 @@
 const path = require('path');
 const http = require('http');
 const { get } = require('lodash');
-const cookie = require('cookie');
+const { decode } = require('fetch-auth-manager');
 const { fileLoader, mergeTypes, mergeResolvers } = require('merge-graphql-schemas');
 const { IsAuthenticatedDirective } = require('graphql-auth-directives');
 const {
   ApolloServer, ApolloError, AuthenticationError, UserInputError,
 } = require('apollo-server-express');
-const { verifyAndUnpack } = require('../services/auth');
 
 const SCHEMAS_GLOB = path.join(__dirname, './**/*.schema.gql');
 const RESOLVERS_GLOB = path.join(__dirname, './**/*.js');
@@ -56,13 +55,11 @@ function formatError(error) {
   return new Error('Something went wrong.');
 }
 
-function onConnect(params, ws, context) {
-  const { request: { headers: { cookie: rawCookies } } } = context;
-
-  const { JWT_PAYLOAD, JWT_SIGNATURE } = cookie.parse(rawCookies);
+function onConnect(params) {
+  const { Authorization } = params;
 
   return {
-    user: verifyAndUnpack(JWT_PAYLOAD, JWT_SIGNATURE),
+    user: decode(Authorization),
   };
 }
 

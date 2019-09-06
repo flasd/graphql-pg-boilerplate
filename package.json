@@ -26,7 +26,7 @@
     "cpf-check": "^3.0.0",
     "dotenv": "^8.0.0",
     "express": "^4.17.1",
-    "fetch-auth-manager": "^0.2.2",
+    "fetch-auth-manager": "^0.3.0",
     "graphql": "^14.4.2",
     "graphql-auth-directives": "^2.1.0",
     "graphql-scalars": "^1.0.0",

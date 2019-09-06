@@ -1,6 +1,6 @@
 const yup = require('yup');
 const cpfCheck = require('cpf-check');
-const { emitToken } = require('../../../services/auth');
+const { createToken } = require('fetch-auth-manager/server');
 const validate = require('../../../services/validate');
 
 
@@ -85,10 +85,10 @@ async function createCard(parent, args, context) {
     customer_id: customerId,
   });
 
-  emitToken(res, {
+  createToken(res, {
     ...user,
     paymentId: customerId,
-  });
+  }, { update: true });
 
   return {
     id: card.id,

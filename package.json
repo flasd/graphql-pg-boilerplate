@@ -19,6 +19,7 @@
   "dependencies": {
     "@sendgrid/mail": "^6.4.0",
     "apollo-server-express": "^2.8.1",
+    "aws-sdk": "^2.524.0",
     "bcryptjs": "^2.4.3",
     "cookie": "^0.4.0",
     "cookie-parser": "^1.4.4",
@@ -27,6 +28,7 @@
     "dotenv": "^8.0.0",
     "express": "^4.17.1",
     "fetch-auth-manager": "^0.3.0",
+    "file-type": "^12.3.0",
     "graphql": "^14.4.2",
     "graphql-auth-directives": "^2.1.0",
     "graphql-scalars": "^1.0.0",
@@ -43,6 +45,8 @@
     "secure-random-string": "^1.1.2",
     "sequelize": "^5.15.0",
     "sequelize-cli": "^5.5.0",
+    "sha1": "^1.1.1",
+    "stream-to-buffer": "^0.1.0",
     "uuid": "^3.3.2",
     "yup": "^0.27.0"
   }

@@ -9,6 +9,7 @@ const withGraphql = require('./graphql');
 const database = require('./database');
 const errorMiddleware = require('./middleware/error-handler');
 const payment = require('./services/payment');
+const { createFileCleanerMiddleware } = require('./services/aws');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -35,6 +36,8 @@ const httpServer = withGraphql(
   app,
   { database, payment },
 );
+
+app.get('/cleanup', createFileCleanerMiddleware({ database }));
 
 app.all('*', (req, res) => {
   res.status(404).send('here be dragons');

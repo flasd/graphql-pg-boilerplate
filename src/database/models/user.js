@@ -103,6 +103,12 @@ module.exports = (sequelize, DataTypes) => {
       foreignKeyConstraint: true,
       allowNull: false,
     });
+
+    user.hasMany(models.userUpload, {
+      foreignKey: { name: 'userId' },
+      foreignKeyConstraint: true,
+      allowNull: false,
+    });
   };
 
   // cannot be arrow function because of the 'this' binding

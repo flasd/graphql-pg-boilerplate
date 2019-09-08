@@ -1,0 +1,17 @@
+type File {
+  id: ID!
+  fileName: String!
+  createdAt: DateTime!
+  url: URL!
+  owner: User!
+}
+
+type Query {
+  file(id: ID!): File! @isAuthenticated
+  files: [File!]! @isAuthenticated
+}
+
+type Mutation {
+  uploadFile(file: Upload!): File! @isAuthenticated
+  deleteFile(id: ID!): Boolean! @isAuthenticated
+}

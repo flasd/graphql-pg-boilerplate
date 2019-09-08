@@ -80,20 +80,26 @@ function withGraphql(app, partialContext) {
     isAuthenticated: IsAuthenticatedDirective,
   };
 
+  const uploads = {
+    maxFieldSize: JSON.parse(process.env.MAX_FILE_SIZE),
+    maxFiles: 1,
+  };
+
+  const playground = process.env.NODE_ENV === 'development' && {
+    settings: {
+      'request.credentials': 'include',
+    },
+  };
+
   const apollo = new ApolloServer({
     typeDefs,
     resolvers,
     schemaDirectives,
-    subscriptions: {
-      onConnect,
-    },
+    subscriptions: { onConnect },
     context: createContext(partialContext),
     formatError,
-    playground: process.env.NODE_ENV === 'development' && {
-      settings: {
-        'request.credentials': 'include',
-      },
-    },
+    uploads,
+    playground,
   });
 
   apollo.applyMiddleware({

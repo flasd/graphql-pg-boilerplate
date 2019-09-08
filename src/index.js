@@ -8,7 +8,7 @@ const { fetchAuthManager } = require('fetch-auth-manager/server');
 const withGraphql = require('./graphql');
 const database = require('./database');
 const errorMiddleware = require('./middleware/error-handler');
-const payment = require('./services/payment');
+const { payment, createPostbackHandler } = require('./services/payment');
 const { createFileCleanerMiddleware } = require('./services/aws');
 
 const app = express();
@@ -21,6 +21,7 @@ const corsConfig = {
   credentials: true,
 };
 
+
 if (process.env.NODE_ENV === 'development') {
   corsConfig.origin.push('http://localhost:3000');
 }
@@ -30,18 +31,27 @@ app.use(helmet());
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(cors(corsConfig));
 app.use(fetchAuthManager());
-app.use(errorMiddleware);
 
 const httpServer = withGraphql(
   app,
   { database, payment },
 );
 
-app.get('/cleanup', createFileCleanerMiddleware({ database }));
+app.get(
+  process.env.FILE_CRON_ENDPOINT,
+  createFileCleanerMiddleware({ database }),
+);
+
+app.post(
+  process.env.PAGARME_POSTBACK_ENDPOINT,
+  createPostbackHandler({ database }),
+);
 
 app.all('*', (req, res) => {
   res.status(404).send('here be dragons');
 });
+
+app.use(errorMiddleware);
 
 function onReady() {
   console.info(`Started server at ${new Date().toISOString()} in port ${PORT}!`);

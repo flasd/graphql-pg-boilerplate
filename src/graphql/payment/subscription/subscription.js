@@ -154,6 +154,8 @@ async function subscribe(parent, args, context) {
     plan_id: planId,
     card_id: cardId,
     card_cvv: cvv,
+    postback_url: `${process.env.BACKEND_URL}/${process.env.PAGARME_POSTBACK_ENDPOINT}`
+      .replace('//', '/'),
     customer: {
       id: userPagarme.pagarmeUserId,
       email: user.email,

@@ -28,4 +28,5 @@ type Mutation {
   recoverPassword(recoveryToken: String!, password: String!): Boolean!
   logout: Boolean!
   removeAccount(password: String!): Boolean! @isAuthenticated
+  changeUserRole(userId: ID!, role: Role): Boolean! @isAuthenticated @hasRole(roles: [admin])
 }

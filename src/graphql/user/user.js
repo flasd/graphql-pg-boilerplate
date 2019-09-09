@@ -52,6 +52,10 @@ async function createAccount(parent, args, context) {
         token: srs({ length: 32 }),
       }, { transaction: t });
 
+      if (process.env.NODE_ENV === 'development') {
+        console.info('Confirmation token: ', emailConfirmationToken.token);
+      }
+
       sendEmail(
         sendEmail.EMAILS.EMAIL_VERIFICATION,
         user.email,
@@ -369,6 +373,34 @@ async function socialLogin(parent, args, context) {
   return true;
 }
 
+const CHANGE_USER_ROLE_SCHEMA = yup.object().strict().shape({
+  userId: yup.string().required(),
+  role: yup.string().oneOf(['admin', 'user']).required(),
+});
+
+async function changeUserRole(parent, args, context) {
+  await validate(CHANGE_USER_ROLE_SCHEMA, args);
+
+  const { database, user: { id } } = context;
+  const { userId, role } = args;
+
+  if (userId === id) {
+    throw new ApolloError('You cannot update your own permissions.');
+  }
+
+  const user = await database.user.findByPk(userId);
+
+  if (!user) {
+    throw new ApolloError('User not found.');
+  }
+
+  await user.update({
+    role,
+  });
+
+  return true;
+}
+
 module.exports = {
   User: {
     fcmTokens: fetchTokens,
@@ -387,5 +419,6 @@ module.exports = {
     logout,
     removeAccount,
     socialLogin,
+    changeUserRole,
   },
 };

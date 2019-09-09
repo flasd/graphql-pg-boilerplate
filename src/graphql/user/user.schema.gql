@@ -20,8 +20,10 @@ type Query {
 
 type Mutation {
   createAccount(input: CreateAccountInput!): Boolean!
+  createSocialAccount(firebaseIdToken: String!): Boolean!
   confirmEmail(confirmationToken: String!): Boolean!
   login(email: EmailAddress!, password: String!): Boolean!
+  socialLogin(firebaseIdToken: String!): Boolean!
   sendPasswordRecoveryEmail(email: EmailAddress!): Boolean!
   recoverPassword(recoveryToken: String!, password: String!): Boolean!
   logout: Boolean!

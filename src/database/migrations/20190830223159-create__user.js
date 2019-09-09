@@ -33,10 +33,20 @@ module.exports = {
 
         role: {
           allowNull: false,
-          type: Sequelize.ENUM('admin', 'user'),
+          type: Sequelize.ENUM(['admin', 'user']),
         },
 
         fcmToken: {
+          allowNull: true,
+          type: Sequelize.STRING(255),
+        },
+
+        source: {
+          allowNull: false,
+          type: Sequelize.ENUM(['self', 'google.com', 'facebook.com', 'twitter.com']),
+        },
+
+        photo: {
           allowNull: true,
           type: Sequelize.STRING(255),
         },
@@ -67,6 +77,7 @@ module.exports = {
           password: '$2a$10$5DUx4vpZqg3VaRAoSYek2uzpiBSFPG3zuuv9a5oJ8eomKon8v6mx6',
           emailVerified: true,
           role: 'admin',
+          source: 'self',
           createdAt: '2019-09-03T19:55:35.654Z',
         },
       ]);

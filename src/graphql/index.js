@@ -3,7 +3,7 @@ const http = require('http');
 const { get } = require('lodash');
 const { decode } = require('fetch-auth-manager');
 const { fileLoader, mergeTypes, mergeResolvers } = require('merge-graphql-schemas');
-const { IsAuthenticatedDirective } = require('graphql-auth-directives');
+const { IsAuthenticatedDirective, HasRoleDirective } = require('graphql-auth-directives');
 const {
   ApolloServer, ApolloError, AuthenticationError, UserInputError,
 } = require('apollo-server-express');
@@ -79,6 +79,7 @@ function withGraphql(app, partialContext) {
       ...(fileLoader(DIRECTIVES_CLASS_GLOB)),
     ])),
     isAuthenticated: IsAuthenticatedDirective,
+    hasRole: HasRoleDirective,
   };
 
   const uploads = {

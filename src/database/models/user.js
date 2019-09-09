@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
 
     email: {
       allowNull: false,
+      unique: true,
       type: DataTypes.STRING(255),
     },
 
@@ -40,10 +41,23 @@ module.exports = (sequelize, DataTypes) => {
 
     role: {
       allowNull: false,
-      type: DataTypes.ENUM('admin', 'user'),
+      type: DataTypes.ENUM(['admin', 'user']),
     },
 
     fcmToken: {
+      allowNull: true,
+      type: DataTypes.STRING(255),
+    },
+
+    source: {
+      allowNull: false,
+      type: DataTypes.ENUM(['self', 'google.com', 'facebook.com', 'twitter.com']),
+      defaultValue() {
+        return 'self';
+      },
+    },
+
+    photo: {
       allowNull: true,
       type: DataTypes.STRING(255),
     },

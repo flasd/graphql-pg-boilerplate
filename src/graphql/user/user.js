@@ -4,6 +4,7 @@ const srs = require('secure-random-string');
 const { createToken, logout: resetToken } = require('fetch-auth-manager/server');
 const validate = require('../../services/validate');
 const sendEmail = require('../../services/email');
+const { auth } = require('../../services/firebase');
 
 
 async function currentUser(parent, args, context) {
@@ -284,17 +285,91 @@ async function removeAccount(parent, args, context) {
   return true;
 }
 
+const CREATE_SOCIAL_ACCOUNT_SCHEMA = yup.object().strict().shape({
+  firebaseIdToken: yup.string().required(),
+});
+
+async function createSocialAccount(parent, args, context) {
+  await validate(CREATE_SOCIAL_ACCOUNT_SCHEMA, args);
+
+  const { database } = context;
+  const { firebaseIdToken } = args;
+
+  const { uid, email } = await auth.verifyIdToken(firebaseIdToken);
+  const user = await auth.getUser(uid);
+
+  if (user.providerData.length === 0) {
+    return false;
+  }
+
+  const [providerData] = user.providerData;
+
+  await database.user.create({
+    name: providerData.displayName,
+    photo: providerData.photoURL,
+    source: providerData.providerId,
+    email,
+    emailVerified: true,
+    password: srs(),
+    role: 'user',
+  });
+
+  return true;
+}
+
+const SOCIAL_LOGIN_SCHEMA = yup.object().strict().shape({
+  firebaseIdToken: yup.string().required(),
+});
+
+async function socialLogin(parent, args, context) {
+  await validate(SOCIAL_LOGIN_SCHEMA, args);
+
+  const { database, res } = context;
+  const { firebaseIdToken } = args;
+
+  const { email } = await auth.verifyIdToken(firebaseIdToken);
+
+  const user = await database.user.findOne({
+    where: {
+      email,
+    },
+  });
+
+  if (!user) {
+    throw new ApolloError('User doesn\'t have an account.');
+  }
+
+  const userPagarme = await database.userPagarme.findOne({
+    where: {
+      userId: user.id,
+    },
+  });
+
+  createToken(res, {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    emailVerified: user.emailVerified,
+    paymentId: userPagarme ? userPagarme.pagarmeUserId : undefined,
+  });
+
+  return true;
+}
+
 module.exports = {
   Query: {
     currentUser,
   },
   Mutation: {
     createAccount,
+    createSocialAccount,
     confirmEmail,
     login,
     sendPasswordRecoveryEmail,
     recoverPassword,
     logout,
     removeAccount,
+    socialLogin,
   },
 };

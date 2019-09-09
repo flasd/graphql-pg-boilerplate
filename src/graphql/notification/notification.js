@@ -217,6 +217,47 @@ async function cancelSubscriptionToTopic(parent, args) {
   return true;
 }
 
+const ADD_TOKEN_TO_USER_SCHEMA = yup.object().strict().shape({
+  deviceId: yup.string().required(),
+});
+
+async function addTokenToUser(parent, args, context) {
+  await validate(ADD_TOKEN_TO_USER_SCHEMA, args);
+
+  const { database, user } = context;
+  const { deviceId } = args;
+
+  await database.user.update({
+    fcmToken: deviceId,
+  }, { where: { id: user.id } });
+
+  return true;
+}
+
+const GET_USER_WITH_TOKEN_SCHEMA = yup.object().strict().shape({
+  name: yup.string(),
+  email: yup.string().email(),
+});
+
+async function getUserWithToken(parent, args, context) {
+  await validate(GET_USER_WITH_TOKEN_SCHEMA, args);
+
+  const { database } = context;
+  const { name, email } = args;
+
+  return database.user.findAll({
+    where: {
+      fcmToken: {
+        [database.Sequelize.Op.not]: null,
+        ...(removeFalsy({
+          name,
+          email,
+        })),
+      },
+    },
+  });
+}
+
 module.exports = {
   Notification: {
     target: fetchUser,
@@ -228,11 +269,13 @@ module.exports = {
   Query: {
     listNotifications,
     getNotification,
+    getUserWithToken,
   },
 
   Mutation: {
     sendNotification,
     subscribeToTopic,
     cancelSubscriptionToTopic,
+    addTokenToUser,
   },
 };

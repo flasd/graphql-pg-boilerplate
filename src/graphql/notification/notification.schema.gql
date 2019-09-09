@@ -1,5 +1,3 @@
-
-
 type Notification {
   id: ID!
   title: String!
@@ -27,12 +25,25 @@ input SendNotificationInput {
 }
 
 type Query {
-  listNotifications(topicId: ID, userId: ID): [Notification!]! @isAuthenticated @hasRole(roles: [admin])
-  getNotification(id: ID!): Notification @isAuthenticated @hasRole(roles: [admin])
+  listNotifications(topicId: ID, userId: ID): [Notification!]!
+    @isAuthenticated
+    @hasRole(roles: [admin])
+
+  getNotification(id: ID!): Notification
+    @isAuthenticated
+    @hasRole(roles: [admin])
+
+  getUserWithToken(name: String, email: EmailAddress): [User!]!
+    @isAuthenticated
+    @hasRole(roles: [admin])
 }
 
 type Mutation {
-  sendNotification(input: SendNotificationInput, targets: [String!]!): Boolean! @isAuthenticated @hasRole(roles: [admin])
+  sendNotification(input: SendNotificationInput, targets: [String!]!): Boolean!
+    @isAuthenticated
+    @hasRole(roles: [admin])
+
   subscribeToTopic(deviceId: String!, topicId: ID!): Boolean!
   cancelSubscriptionToTopic(deviceId: ID!, topicId: ID!): Boolean!
+  addTokenToUser(deviceId: ID!): Boolean!
 }

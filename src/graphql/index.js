@@ -37,6 +37,7 @@ function createContext(partialContext = {}) {
 function formatError(error) {
   if (process.env.NODE_ENV === 'development') {
     console.error(error);
+    return error;
   }
 
   if (

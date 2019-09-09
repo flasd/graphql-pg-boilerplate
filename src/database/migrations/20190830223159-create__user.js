@@ -38,7 +38,7 @@ module.exports = {
 
         fcmToken: {
           allowNull: true,
-          type: Sequelize.STRING(127),
+          type: Sequelize.STRING(255),
         },
 
         createdAt: {

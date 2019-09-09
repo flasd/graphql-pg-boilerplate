@@ -36,6 +36,11 @@ module.exports = {
           type: Sequelize.ENUM('admin', 'user'),
         },
 
+        fcmToken: {
+          allowNull: true,
+          type: Sequelize.STRING(127),
+        },
+
         createdAt: {
           allowNull: false,
           type: Sequelize.DATE,

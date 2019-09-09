@@ -1,7 +1,7 @@
 const uuid = require('uuid/v4');
 
 module.exports = (sequelize, DataTypes) => {
-  const tableName = 'userUpload';
+  const tableName = 'notification';
 
   const columns = {
     id: {
@@ -15,24 +15,60 @@ module.exports = (sequelize, DataTypes) => {
     },
 
     userId: {
-      allowNull: false,
+      allowNull: true,
       type: DataTypes.UUID,
     },
 
-    fileName: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
+    topicId: {
+      allowNull: true,
+      type: DataTypes.UUID,
     },
 
-    deleteFailed: {
-      type: DataTypes.BOOLEAN,
+    icon: {
       allowNull: true,
+      type: DataTypes.UUID,
+    },
+
+    image: {
+      allowNull: true,
+      type: DataTypes.UUID,
+    },
+
+    title: {
+      allowNull: false,
+      type: DataTypes.STRING(95),
+    },
+
+    body: {
+      allowNull: false,
+      type: DataTypes.STRING(140),
+    },
+
+    action: {
+      allowNull: false,
+      type: DataTypes.STRING(255),
+    },
+
+    color: {
+      allowNull: false,
+      type: DataTypes.STRING(7),
+    },
+
+    priority: {
+      allowNull: false,
+      type: DataTypes.BOOLEAN,
+    },
+
+    data: {
+      allowNull: true,
+      type: DataTypes.JSON,
     },
 
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE,
     },
+
     updatedAt: {
       allowNull: true,
       type: DataTypes.DATE,
@@ -48,27 +84,27 @@ module.exports = (sequelize, DataTypes) => {
     tableName,
   };
 
-  const userUpload = sequelize.define(tableName, columns, metadata);
+  const notification = sequelize.define(tableName, columns, metadata);
 
-  userUpload.associate = (models) => {
-    userUpload.belongsTo(models.user, {
-      foreignKey: { name: 'userId' },
+  notification.associate = (models) => {
+    notification.belongsTo(models.notificationTopic, {
+      foreignKey: { name: 'topicId' },
       foreignKeyConstraint: true,
-      allowNull: false,
+      allowNull: true,
     });
 
-    userUpload.hasMany(models.notification, {
+    notification.belongsTo(models.userUpload, {
       foreignKey: { name: 'icon' },
       foreignKeyConstraint: true,
       allowNull: true,
     });
 
-    userUpload.hasMany(models.notification, {
+    notification.belongsTo(models.userUpload, {
       foreignKey: { name: 'image' },
       foreignKeyConstraint: true,
       allowNull: true,
     });
   };
 
-  return userUpload;
+  return notification;
 };

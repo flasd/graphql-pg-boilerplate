@@ -1,0 +1,38 @@
+
+
+type Notification {
+  id: ID!
+  title: String!
+  body: String!
+  action: URL!
+  priority: Boolean!
+  color: HexColorCode
+  data: JSONObject
+  createdAt: DateTime!
+  target: String
+  topic: NotificationTopic
+  icon: File
+  image: File
+}
+
+input SendNotificationInput {
+  title: String!
+  body: String!
+  action: String!
+  priority: Boolean!
+  color: HexColorCode
+  data: JSONObject
+  icon: ID
+  image: ID
+}
+
+type Query {
+  listNotifications(topicId: ID, userId: ID): [Notification!]! @isAuthenticated @hasRole(roles: [admin])
+  getNotification(id: ID!): Notification @isAuthenticated @hasRole(roles: [admin])
+}
+
+type Mutation {
+  sendNotification(input: SendNotificationInput, targets: [String!]!): Boolean! @isAuthenticated @hasRole(roles: [admin])
+  subscribeToTopic(deviceId: String!, topicId: ID!): Boolean!
+  cancelSubscriptionToTopic(deviceId: ID!, topicId: ID!): Boolean!
+}

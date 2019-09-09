@@ -74,9 +74,9 @@ async function removeFile(fileName) {
   return deleteFile(fileName);
 }
 
-async function getFileUrl(fileName) {
+async function getFileUrl(fileName, expires) {
   return s3.getSignedUrlPromise('getObject', {
-    Expires: 30,
+    Expires: expires || 30,
     Bucket: process.env.AWS_BUCKET,
     Key: fileName,
   });

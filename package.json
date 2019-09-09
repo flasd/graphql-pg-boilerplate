@@ -31,6 +31,7 @@
     "express-ipfilter": "^1.0.1",
     "fetch-auth-manager": "^0.3.0",
     "file-type": "^12.3.0",
+    "firebase-admin": "^8.5.0",
     "graphql": "^14.4.2",
     "graphql-auth-directives": "^2.1.0",
     "graphql-scalars": "^1.0.0",

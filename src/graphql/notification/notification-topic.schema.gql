@@ -1,0 +1,15 @@
+type NotificationTopic {
+  id: ID!
+  name: String!
+  createdAt: DateTime!
+}
+
+type Query {
+  listTopics: [NotificationTopic!]!
+  getTopic(id: ID!): NotificationTopic
+}
+
+type Mutation {
+  createTopic(name: String!): NotificationTopic!  @isAuthenticated @hasRole(roles: [admin])
+  deleteTopic(id: ID!): Boolean!  @isAuthenticated @hasRole(roles: [admin])
+}

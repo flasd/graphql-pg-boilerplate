@@ -36,11 +36,6 @@ module.exports = {
           type: Sequelize.ENUM(['admin', 'user']),
         },
 
-        fcmToken: {
-          allowNull: true,
-          type: Sequelize.STRING(255),
-        },
-
         source: {
           allowNull: false,
           type: Sequelize.ENUM(['self', 'google.com', 'facebook.com', 'twitter.com']),

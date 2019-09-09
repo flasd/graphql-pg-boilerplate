@@ -44,11 +44,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.ENUM(['admin', 'user']),
     },
 
-    fcmToken: {
-      allowNull: true,
-      type: DataTypes.STRING(255),
-    },
-
     source: {
       allowNull: false,
       type: DataTypes.ENUM(['self', 'google.com', 'facebook.com', 'twitter.com']),
@@ -124,6 +119,12 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     user.hasMany(models.userUpload, {
+      foreignKey: { name: 'userId' },
+      foreignKeyConstraint: true,
+      allowNull: false,
+    });
+
+    user.hasMany(models.userToken, {
       foreignKey: { name: 'userId' },
       foreignKeyConstraint: true,
       allowNull: false,

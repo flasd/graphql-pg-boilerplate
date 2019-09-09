@@ -1,5 +1,7 @@
 const yup = require('yup');
-const { negate, isNil, pickBy } = require('lodash');
+const {
+  negate, isNil, pickBy, uniq,
+} = require('lodash');
 const { ApolloError } = require('apollo-server-express');
 const validate = require('../../services/validate');
 const { messaging } = require('../../services/firebase');
@@ -169,7 +171,19 @@ async function sendNotification(parent, args, context) {
           return messaging.sendToTopic(target, notification);
         }
 
-        return messaging.sendToDevice(target, notification);
+        const userTokens = await database.userToken.findAll({
+          where: {
+            userId: target,
+          },
+        });
+
+        const tokens = uniq(userTokens.map((item) => item.dataValues.fcmToken));
+
+        return Promise.all(
+          tokens.map(async (token) => {
+            await messaging.sendToDevice(token, notification);
+          }),
+        );
       } catch (error) {
         console.error(error);
         return null;
@@ -227,10 +241,10 @@ async function addTokenToUser(parent, args, context) {
   const { database, user } = context;
   const { deviceId } = args;
 
-  await database.user.update({
+  await database.userToken.create({
+    userId: user.id,
     fcmToken: deviceId,
-  }, { where: { id: user.id } });
-
+  });
   return true;
 }
 
@@ -245,17 +259,20 @@ async function getUserWithToken(parent, args, context) {
   const { database } = context;
   const { name, email } = args;
 
-  return database.user.findAll({
-    where: {
-      fcmToken: {
-        [database.Sequelize.Op.not]: null,
-        ...(removeFalsy({
-          name,
-          email,
-        })),
-      },
-    },
+  const users = await database.user.findAll({
+    limit: 10,
+    where: removeFalsy({
+      name,
+      email,
+    }),
   });
+
+  const uniqueUsers = await database.userToken.aggregate('userId', 'DISTINCT', { plain: false });
+  const usersIdsWithTokens = uniqueUsers.map((item) => item.DISTINCT);
+
+  return users
+    .filter((item) => usersIdsWithTokens.includes(item.dataValues.id))
+    .map((item) => item.dataValues);
 }
 
 module.exports = {

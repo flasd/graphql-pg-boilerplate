@@ -6,6 +6,18 @@ const validate = require('../../services/validate');
 const sendEmail = require('../../services/email');
 const { auth } = require('../../services/firebase');
 
+async function fetchTokens(parent, args, context) {
+  const { id } = parent;
+  const { database } = context;
+
+  const userTokens = await database.userToken.findAll({
+    where: {
+      userId: id,
+    },
+  });
+
+  return userTokens.map((item) => item.dataValues.fcmToken);
+}
 
 async function currentUser(parent, args, context) {
   const { database, user } = context;
@@ -358,6 +370,10 @@ async function socialLogin(parent, args, context) {
 }
 
 module.exports = {
+  User: {
+    fcmTokens: fetchTokens,
+  },
+
   Query: {
     currentUser,
   },

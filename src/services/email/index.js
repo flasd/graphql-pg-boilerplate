@@ -18,7 +18,11 @@ async function send(email, to, variables) {
       to,
       from: process.env.EMAIL_FROM,
       templateId: email.templateId,
-      dynamic_template_data: variables,
+      dynamic_template_data: {
+        ...variables,
+        appUrl: `${process.env.FRONTEND_URL}`,
+        appName: `${process.env.APP_NAME}`,
+      },
     });
   } catch (error) {
     console.error(error);

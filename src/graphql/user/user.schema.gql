@@ -16,6 +16,7 @@ input CreateAccountInput {
 
 type Query {
   currentUser: User! @isAuthenticated
+  recoveryTokenExists(recoveryToken: String!): Boolean!
 }
 
 type Mutation {

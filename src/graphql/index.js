@@ -7,6 +7,8 @@ const { IsAuthenticatedDirective, HasRoleDirective } = require('graphql-auth-dir
 const {
   ApolloServer, ApolloError, AuthenticationError, UserInputError,
 } = require('apollo-server-express');
+const { createRateLimitTypeDef, createRateLimitDirective } = require('graphql-rate-limit-directive');
+const rateLimiter = require('../services/rate-limiter');
 
 const SCHEMAS_GLOB = path.join(__dirname, './**/*.schema.gql');
 const RESOLVERS_GLOB = path.join(__dirname, './**/*.js');
@@ -27,6 +29,7 @@ function createContext(partialContext = {}) {
       res,
       headers: req.headers,
       user: req.user,
+      ip: req.ip,
       ...partialContext,
     };
 
@@ -56,6 +59,7 @@ function formatError(error) {
   return new Error('Something went wrong.');
 }
 
+
 function onConnect(params) {
   const { Authorization } = params;
 
@@ -68,6 +72,7 @@ function withGraphql(app, partialContext) {
   const typeDefs = mergeTypes([
     ...(fileLoader(SCHEMAS_GLOB)),
     ...(fileLoader(DIRECTIVES_SCHEMA_GLOB)),
+    createRateLimitTypeDef(),
   ]);
 
   const resolvers = mergeResolvers([
@@ -80,6 +85,7 @@ function withGraphql(app, partialContext) {
     ])),
     isAuthenticated: IsAuthenticatedDirective,
     hasRole: HasRoleDirective,
+    rateLimit: createRateLimitDirective(rateLimiter),
   };
 
   const uploads = {

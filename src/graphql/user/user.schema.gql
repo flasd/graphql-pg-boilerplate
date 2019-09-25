@@ -16,18 +16,18 @@ input CreateAccountInput {
 
 type Query {
   currentUser: User! @isAuthenticated
-  recoveryTokenExists(recoveryToken: String!): Boolean!
+  recoveryTokenExists(recoveryToken: String!): Boolean! @rateLimit(limit: 3, duration: 86400)
 }
 
 type Mutation {
-  createAccount(input: CreateAccountInput!): Boolean!
-  createSocialAccount(firebaseIdToken: String!): Boolean!
-  confirmEmail(confirmationToken: String!): Boolean!
-  login(email: EmailAddress!, password: String!): Boolean!
-  socialLogin(firebaseIdToken: String!): Boolean!
-  sendPasswordRecoveryEmail(email: EmailAddress!): Boolean!
-  recoverPassword(recoveryToken: String!, password: String!): Boolean!
-  logout: Boolean!
+  createAccount(input: CreateAccountInput!): Boolean! @rateLimit(limit: 3, duration: 86400)
+  createSocialAccount(firebaseIdToken: String!): Boolean! @rateLimit(limit: 6, duration: 86400)
+  confirmEmail(confirmationToken: String!): Boolean! @rateLimit(limit: 3, duration: 86400)
+  login(email: EmailAddress!, password: String!): Boolean!  @rateLimit(limit: 12, duration: 86400)
+  socialLogin(firebaseIdToken: String!): Boolean! @rateLimit(limit: 3, duration: 86400)
+  sendPasswordRecoveryEmail(email: EmailAddress!): Boolean! @rateLimit(limit: 3, duration: 86400)
+  recoverPassword(recoveryToken: String!, password: String!): Boolean! @rateLimit(limit: 3, duration: 86400)
+  logout: Boolean! @rateLimit(limit: 12, duration: 86400)
   removeAccount(password: String!): Boolean! @isAuthenticated
   changeUserRole(userId: ID!, role: Role): Boolean! @isAuthenticated @hasRole(roles: [admin])
 }

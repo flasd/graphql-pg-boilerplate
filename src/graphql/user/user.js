@@ -38,35 +38,49 @@ async function createAccount(parent, args, context) {
   const { database } = context;
   const { name, email, password } = args.input;
 
-  await new Promise((resolve) => {
+  await new Promise((resolve, reject) => {
     database.sequelize.transaction(async (t) => {
-      const user = await database.user.create({
-        name,
-        email,
-        password,
-        role: 'user',
-      }, { transaction: t });
+      try {
+        let user;
+        try {
+          user = await database.user.create({
+            name,
+            email,
+            password,
+            role: 'user',
+          }, { transaction: t });
+        } catch (error) {
+          throw new ApolloError('E-mail taken.', 'x0002');
+        }
 
-      const emailConfirmationToken = await database.emailConfirmationToken.create({
-        userId: user.id,
-        token: srs({ length: 32 }),
-      }, { transaction: t });
+        const emailConfirmationToken = await database.emailConfirmationToken.create({
+          userId: user.id,
+          token: srs({ length: 32 }),
+        }, { transaction: t });
 
-      if (process.env.NODE_ENV === 'development') {
-        console.info('Confirmation token: ', emailConfirmationToken.token);
+        if (process.env.NODE_ENV === 'development') {
+          console.info('Confirmation token: ', emailConfirmationToken.token);
+        }
+
+        sendEmail(
+          sendEmail.EMAILS.EMAIL_VERIFICATION,
+          user.email,
+          {
+            name: user.name,
+            email: user.email,
+            confirmUrl: `${
+              process.env.FRONTEND_URL
+            }/${
+              process.env.FRONTEND_CONFIRM_EMAIL_PATH
+            }/${emailConfirmationToken.token}`.replace(/\/{2,}/g, '/'),
+            confirmToken: emailConfirmationToken.token,
+          },
+        );
+
+        resolve();
+      } catch (error) {
+        reject(error);
       }
-
-      sendEmail(
-        sendEmail.EMAILS.EMAIL_VERIFICATION,
-        user.email,
-        {
-          name: user.name,
-          email: user.email,
-          emailConfirmationToken: emailConfirmationToken.token,
-        },
-      );
-
-      resolve();
     });
   });
 
@@ -208,11 +222,38 @@ async function sendPasswordRecoveryEmail(parent, args, context) {
     {
       name: user.name,
       email: user.email,
+      resetUrl: `${
+        process.env.FRONTEND_URL
+      }/${
+        process.env.FRONTEND_RESET_PASSWORD_PATH
+      }/${passwordRecoveryToken.token}`.replace(/\/{2,}/g, '/'),
       passwordRecoveryToken: passwordRecoveryToken.token,
     },
   );
 
   return true;
+}
+
+const RECOVERY_TOKEN_EXISTS_SCHEMA = yup.object().strict().shape({
+  recoveryToken: yup.string().length(32).required(),
+});
+
+async function recoveryTokenExists(parent, args, context) {
+  await validate(RECOVERY_TOKEN_EXISTS_SCHEMA, args);
+
+  const { database } = context;
+
+  const passwordRecoveryToken = await database.passwordRecoveryToken.findOne({
+    where: {
+      token: args.recoveryToken,
+    },
+  });
+
+  if (passwordRecoveryToken) {
+    return true;
+  }
+
+  return false;
 }
 
 const RECOVER_PASSWORD_SCHEMA = yup.object().strict().shape({
@@ -320,6 +361,21 @@ async function createSocialAccount(parent, args, context) {
 
   const [providerData] = user.providerData;
 
+  const ownUser = await database.user.findOne({
+    where: {
+      email,
+    },
+  });
+
+  if (ownUser) {
+    await ownUser.update({
+      photo: providerData.photoURL,
+      emailVerified: true,
+    });
+
+    return false;
+  }
+
   await database.user.create({
     name: providerData.displayName,
     photo: providerData.photoURL,
@@ -408,6 +464,7 @@ module.exports = {
 
   Query: {
     currentUser,
+    recoveryTokenExists,
   },
   Mutation: {
     createAccount,

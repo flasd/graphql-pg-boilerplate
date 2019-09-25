@@ -3,7 +3,6 @@ const express = require('express');
 const gracefulShutdown = require('http-graceful-shutdown');
 const cors = require('cors');
 const helmet = require('helmet');
-const cookieParser = require('cookie-parser');
 const { fetchAuthManager } = require('fetch-auth-manager/server');
 const withGraphql = require('./graphql');
 const database = require('./database');
@@ -33,7 +32,6 @@ if (process.env.NODE_ENV === 'development') {
 
 
 app.use(helmet());
-app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(cors(corsConfig));
 app.use(fetchAuthManager());
 

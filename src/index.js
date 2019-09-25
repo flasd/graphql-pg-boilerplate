@@ -19,6 +19,11 @@ const corsConfig = {
 
   preflightContinue: false,
   credentials: true,
+  exposedHeaders: [
+    'X-Token-Create',
+    'X-Token-Update',
+    'X-Token-Remove',
+  ],
 };
 
 

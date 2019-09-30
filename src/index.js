@@ -60,10 +60,23 @@ function onReady() {
   console.info(`Started server at ${new Date().toISOString()} in port ${PORT}!`);
 }
 
-httpServer.listen(PORT, onReady);
+async function main() {
+  try {
+    await database.sequelize.authenticate();
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
+    return;
+  }
+
+  httpServer.listen(PORT, onReady);
+}
 
 gracefulShutdown(httpServer, {
+  onShutdown: () => database.sequelize.close(),
   finally: () => {
-    console.info(`\nServer stopped at ${new Date().toISOString()}`);
+    console.info(`\nServer gracefully stopped at ${new Date().toISOString()}`);
   },
 });
+
+main();

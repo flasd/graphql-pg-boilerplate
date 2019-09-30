@@ -404,6 +404,39 @@ async function removeAccount(parent, args, context) {
   return true;
 }
 
+const REMOVE_ACCOUNT_AS_ADMIN_SCHEMA = yup.object().strict().shape({
+  id: yup.string().required(),
+  password: yup.string().min(6).max(255).required(),
+});
+
+async function removeAccountAsAdmin(parent, args, context) {
+  await validate(REMOVE_ACCOUNT_AS_ADMIN_SCHEMA, args);
+
+  const { database, user } = context;
+  const { id, password } = args;
+
+  const admin = await database.user.findByPk(user.id);
+
+  if (!admin.hasPassword(password)) {
+    throw new ApolloError('Invalid password.');
+  }
+
+  const target = await database.user.findByPk(id);
+
+
+  if (!target) {
+    throw new ApolloError('User not found.');
+  }
+
+  if (target.role === 'admin') {
+    throw new ApolloError('Can\'t remove admin.');
+  }
+
+  await target.destroy();
+
+  return true;
+}
+
 const CREATE_SOCIAL_ACCOUNT_SCHEMA = yup.object().strict().shape({
   firebaseIdToken: yup.string().required(),
 });
@@ -520,6 +553,11 @@ async function changeUserRole(parent, args, context) {
   return true;
 }
 
+async function sendPasswordRecoveryEmailAdmin(parent, args, context) {
+  // this allows admins to bypass rate limiting
+  return sendPasswordRecoveryEmail(parent, args, context);
+}
+
 module.exports = {
   User: {
     fcmTokens: fetchTokens,
@@ -531,15 +569,17 @@ module.exports = {
     recoveryTokenExists,
   },
   Mutation: {
+    changeUserRole,
+    confirmEmail,
     createAccount,
     createSocialAccount,
-    confirmEmail,
     login,
-    sendPasswordRecoveryEmail,
-    recoverPassword,
     logout,
+    recoverPassword,
     removeAccount,
+    removeAccountAsAdmin,
+    sendPasswordRecoveryEmail,
     socialLogin,
-    changeUserRole,
+    sendPasswordRecoveryEmailAdmin,
   },
 };

@@ -41,9 +41,11 @@ input UserFilterInput {
 type Query {
   currentUser: User! @isAuthenticated
 
-  listUsers(page: Int!, order: Order!, filter: UserFilterInput): UserPagination!
-    @isAuthenticated
-    @hasRole(roles: [admin])
+  listUsers(
+    page: Int!
+    order: Order!
+    filter: UserFilterInput
+  ): UserPagination! @isAuthenticated @hasRole(roles: [admin])
 
   recoveryTokenExists(recoveryToken: String!): Boolean!
     @rateLimit(limit: 3, duration: 86400)
@@ -68,6 +70,10 @@ type Mutation {
   sendPasswordRecoveryEmail(email: EmailAddress!): Boolean!
     @rateLimit(limit: 3, duration: 86400)
 
+  sendPasswordRecoveryEmailAdmin(email: EmailAddress!): Boolean!
+    @isAuthenticated
+    @hasRole(roles: [admin])
+
   recoverPassword(recoveryToken: String!, password: String!): Boolean!
     @rateLimit(limit: 3, duration: 86400)
 
@@ -76,6 +82,10 @@ type Mutation {
   removeAccount(password: String!): Boolean!
     @isAuthenticated
     @rateLimit(limit: 2, duration: 86400)
+
+  removeAccountAsAdmin(id: ID!, password: String!): Boolean!
+    @isAuthenticated
+    @hasRole(roles: [admin])
 
   changeUserRole(userId: ID!, role: Role): Boolean!
     @isAuthenticated

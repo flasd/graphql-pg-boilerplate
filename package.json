@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev:db": "node scripts/start-postgres.js",
+    "start:db": "node scripts/start-postgres.js",
     "lint": "eslint src",
     "dev": "node scripts/detect-postgres.js && nodemon src",
     "start": "node src"

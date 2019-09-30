@@ -1,0 +1,10 @@
+enum Order {
+  desc
+  asc
+}
+
+# type Pagination<T> {
+#   docs: [T!]!
+#   pages: Int!
+#   total: Int!
+# }

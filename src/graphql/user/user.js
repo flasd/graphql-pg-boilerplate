@@ -26,6 +26,67 @@ async function currentUser(parent, args, context) {
 }
 
 
+const LIST_USERS_SCHEMA = yup.object().strict().shape({
+  page: yup.number().integer().min(0).required(),
+  order: yup.string().oneOf(['asc', 'desc']).required(),
+  filter: yup.object().strict().shape({
+    name: yup.string(),
+    photo: yup.bool(),
+    emailVerified: yup.bool(),
+    role: yup.string().oneOf(['admin', 'user']),
+    source: yup.string().oneOf(['facebook', 'google', 'twitter', 'self']),
+  }),
+});
+
+async function listUsers(parent, args, context) {
+  await validate(LIST_USERS_SCHEMA, args);
+
+  const { database } = context;
+
+  const where = {};
+
+  if (args.filter) {
+    const {
+      name, photo, emailVerified, role, source,
+    } = args.filter;
+    const { like, not, is } = database.Sequelize.Op;
+
+    if (name) {
+      where.name = {
+        [like]: `%${name || ''}%`,
+      };
+    }
+
+    if (typeof photo === 'boolean') {
+      where.photo = {
+        [photo ? not : is]: null,
+      };
+    }
+
+    if (typeof emailVerified === 'boolean') {
+      where.emailVerified = {
+        [emailVerified ? is : not]: true,
+      };
+    }
+
+    if (role) {
+      where.role = role;
+    }
+
+    if (source) {
+      where.source = source === 'self' ? source : `${source}.com`;
+    }
+  }
+
+  return database.user.paginate({
+    page: args.page,
+    paginate: 25,
+    order: [['name', `${args.order}`.toUpperCase()]],
+    where,
+  });
+}
+
+
 const CREATE_ACCOUNT_SCHEMA = yup.object().strict().shape({
   name: yup.string().min(3).max(127).required(),
   email: yup.string().email().required(),
@@ -186,6 +247,7 @@ async function login(parent, args, context) {
     name: user.name,
     role: user.role,
     emailVerified: user.emailVerified,
+    photo: user.photo,
     paymentId: userPagarme ? userPagarme.pagarmeUserId : undefined,
   });
 
@@ -422,6 +484,7 @@ async function socialLogin(parent, args, context) {
     email: user.email,
     name: user.name,
     role: user.role,
+    photo: user.photo,
     emailVerified: user.emailVerified,
     paymentId: userPagarme ? userPagarme.pagarmeUserId : undefined,
   });
@@ -464,6 +527,7 @@ module.exports = {
 
   Query: {
     currentUser,
+    listUsers,
     recoveryTokenExists,
   },
   Mutation: {

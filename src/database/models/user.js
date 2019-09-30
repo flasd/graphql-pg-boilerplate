@@ -1,5 +1,6 @@
 const { genSaltSync, hashSync, compareSync } = require('bcryptjs');
 const uuid = require('uuid/v4');
+const sequelizePaginate = require('sequelize-paginate');
 
 module.exports = (sequelize, DataTypes) => {
   const tableName = 'user';
@@ -138,6 +139,8 @@ module.exports = (sequelize, DataTypes) => {
       this.password,
     );
   };
+
+  sequelizePaginate.paginate(user);
 
   return user;
 };

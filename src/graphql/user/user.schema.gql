@@ -3,9 +3,18 @@ type User {
   name: String!
   email: String!
   emailVerified: Boolean!
+  source: String!
+  role: String!
+  photo: String
   fcmTokens: [String!]!
   createdAt: DateTime!
   updateAt: DateTime
+}
+
+type UserPagination {
+  docs: [User!]!
+  pages: Int!
+  total: Int!
 }
 
 input CreateAccountInput {
@@ -14,20 +23,61 @@ input CreateAccountInput {
   password: String!
 }
 
+enum Source {
+  google
+  facebook
+  twitter
+  self
+}
+
+input UserFilterInput {
+  name: String
+  photo: Boolean
+  emailVerified: Boolean
+  role: Role
+  source: Source
+}
+
 type Query {
   currentUser: User! @isAuthenticated
-  recoveryTokenExists(recoveryToken: String!): Boolean! @rateLimit(limit: 3, duration: 86400)
+
+  listUsers(page: Int!, order: Order!, filter: UserFilterInput): UserPagination!
+    @isAuthenticated
+    @hasRole(roles: [admin])
+
+  recoveryTokenExists(recoveryToken: String!): Boolean!
+    @rateLimit(limit: 3, duration: 86400)
 }
 
 type Mutation {
-  createAccount(input: CreateAccountInput!): Boolean! @rateLimit(limit: 3, duration: 86400)
-  createSocialAccount(firebaseIdToken: String!): Boolean! @rateLimit(limit: 6, duration: 86400)
-  confirmEmail(confirmationToken: String!): Boolean! @rateLimit(limit: 3, duration: 86400)
-  login(email: EmailAddress!, password: String!): Boolean!  @rateLimit(limit: 12, duration: 86400)
-  socialLogin(firebaseIdToken: String!): Boolean! @rateLimit(limit: 3, duration: 86400)
-  sendPasswordRecoveryEmail(email: EmailAddress!): Boolean! @rateLimit(limit: 3, duration: 86400)
-  recoverPassword(recoveryToken: String!, password: String!): Boolean! @rateLimit(limit: 3, duration: 86400)
+  createAccount(input: CreateAccountInput!): Boolean!
+    @rateLimit(limit: 3, duration: 86400)
+
+  createSocialAccount(firebaseIdToken: String!): Boolean!
+    @rateLimit(limit: 6, duration: 86400)
+
+  confirmEmail(confirmationToken: String!): Boolean!
+    @rateLimit(limit: 3, duration: 86400)
+
+  login(email: EmailAddress!, password: String!): Boolean!
+    @rateLimit(limit: 12, duration: 86400)
+
+  socialLogin(firebaseIdToken: String!): Boolean!
+    @rateLimit(limit: 6, duration: 86400)
+
+  sendPasswordRecoveryEmail(email: EmailAddress!): Boolean!
+    @rateLimit(limit: 3, duration: 86400)
+
+  recoverPassword(recoveryToken: String!, password: String!): Boolean!
+    @rateLimit(limit: 3, duration: 86400)
+
   logout: Boolean! @rateLimit(limit: 12, duration: 86400)
-  removeAccount(password: String!): Boolean! @isAuthenticated
-  changeUserRole(userId: ID!, role: Role): Boolean! @isAuthenticated @hasRole(roles: [admin])
+
+  removeAccount(password: String!): Boolean!
+    @isAuthenticated
+    @rateLimit(limit: 2, duration: 86400)
+
+  changeUserRole(userId: ID!, role: Role): Boolean!
+    @isAuthenticated
+    @hasRole(roles: [admin])
 }

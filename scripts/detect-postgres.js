@@ -4,10 +4,14 @@ const shellExec = require('shell-exec');
 
 async function main() {
   console.info('Detecting running Postgres container...');
-  const result = await shellExec('docker ps');
+  const { stdout: dockerPsStdout } = await shellExec('docker ps');
 
-  if (result.stdout.indexOf('postgres') !== -1 && result.stdout.indexOf('Up') !== -1) {
-    console.error('Ok.\n');
+  if (
+    dockerPsStdout.includes('postgres')
+    && dockerPsStdout.includes('Up')
+    && dockerPsStdout.includes(`${process.env.POSTGRES_PORT}/tcp`)
+  ) {
+    console.info('Ok.\n');
     return;
   }
 

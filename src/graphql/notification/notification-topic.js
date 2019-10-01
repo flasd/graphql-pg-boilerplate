@@ -1,11 +1,52 @@
 const yup = require('yup');
+const { negate, isNil, pickBy } = require('lodash');
 const validate = require('../../services/validate');
 
+function removeFalsy(obj) {
+  return pickBy(obj, negate(isNil));
+}
 
-async function listTopics(parent, args, context) {
+async function deleteable(parent, args, context) {
+  const { id } = parent;
+
   const { database } = context;
 
-  return database.notificationTopic.findAll();
+  const count = await database.notification.count({
+    where: {
+      topicId: id,
+    },
+  });
+
+  return !count;
+}
+
+const LIST_TOPICS_SCHEMA = yup.object().strict().shape({
+  name: yup.string().max(127),
+});
+
+async function listTopics(parent, args, context) {
+  await validate(LIST_TOPICS_SCHEMA, args);
+
+  const { database } = context;
+
+  const where = removeFalsy({
+    name: args.name ? {
+      [database.Sequelize.Op.like]: `${args.name}%`,
+    } : null,
+  });
+
+  const topics = await database.notificationTopic.findAll({
+    where,
+  });
+
+  const total = await database.notificationTopic.count({
+    where,
+  });
+
+  return {
+    topics,
+    total,
+  };
 }
 
 const GET_TOPIC_SCHEMA = yup.object().strict().shape({
@@ -56,6 +97,10 @@ async function deleteTopic(parent, args, context) {
 }
 
 module.exports = {
+  NotificationTopic: {
+    deleteable,
+  },
+
   Query: {
     listTopics,
     getTopic,

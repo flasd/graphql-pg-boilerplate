@@ -45,5 +45,5 @@ type Mutation {
 
   subscribeToTopic(deviceId: String!, topicId: ID!): Boolean!
   cancelSubscriptionToTopic(deviceId: ID!, topicId: ID!): Boolean!
-  addTokenToUser(deviceId: ID!): Boolean!
+  addTokenToUser(deviceId: ID!): Boolean! @isAuthenticated
 }

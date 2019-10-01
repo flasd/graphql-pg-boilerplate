@@ -1,11 +1,17 @@
 type NotificationTopic {
   id: ID!
   name: String!
+  deleteable: Boolean!
   createdAt: DateTime!
 }
 
+type NotificationTopicQueryResult {
+  topics: [NotificationTopic!]!
+  total: Int!
+}
+
 type Query {
-  listTopics: [NotificationTopic!]!
+  listTopics(name: String): NotificationTopicQueryResult!
   getTopic(id: ID!): NotificationTopic
 }
 

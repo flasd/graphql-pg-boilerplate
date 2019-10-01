@@ -262,17 +262,27 @@ async function getUserWithToken(parent, args, context) {
   const users = await database.user.findAll({
     limit: 10,
     where: removeFalsy({
-      name,
-      email,
+      name: name ? {
+        [database.Sequelize.Op.like]: `${name}%`,
+      } : null,
+      email: email ? {
+        [database.Sequelize.Op.like]: `${email}%`,
+      } : null,
     }),
   });
 
-  const uniqueUsers = await database.userToken.aggregate('userId', 'DISTINCT', { plain: false });
-  const usersIdsWithTokens = uniqueUsers.map((item) => item.DISTINCT);
+  const ids = users.map((user) => user.dataValues.id);
+
+  const tokens = await database.userToken.findAll({
+    where: {
+      userId: {
+        [database.Sequelize.Op.In]: ids,
+      },
+    },
+  });
 
   return users
-    .filter((item) => usersIdsWithTokens.includes(item.dataValues.id))
-    .map((item) => item.dataValues);
+    .filter((user) => tokens.find((item) => item.dataValues.userId === user.dataValues.id));
 }
 
 module.exports = {

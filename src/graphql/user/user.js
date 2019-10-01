@@ -528,16 +528,23 @@ async function socialLogin(parent, args, context) {
 const CHANGE_USER_ROLE_SCHEMA = yup.object().strict().shape({
   userId: yup.string().required(),
   role: yup.string().oneOf(['admin', 'user']).required(),
+  password: yup.string().required(),
 });
 
 async function changeUserRole(parent, args, context) {
   await validate(CHANGE_USER_ROLE_SCHEMA, args);
 
   const { database, user: { id } } = context;
-  const { userId, role } = args;
+  const { userId, role, password } = args;
 
   if (userId === id) {
     throw new ApolloError('You cannot update your own permissions.');
+  }
+
+  const admin = await database.user.findByPk(id);
+
+  if (!admin.hasPassword(password)) {
+    throw new ApolloError('Wrong password.');
   }
 
   const user = await database.user.findByPk(userId);

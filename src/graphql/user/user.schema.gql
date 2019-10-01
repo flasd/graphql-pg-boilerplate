@@ -87,7 +87,7 @@ type Mutation {
     @isAuthenticated
     @hasRole(roles: [admin])
 
-  changeUserRole(userId: ID!, role: Role): Boolean!
+  changeUserRole(userId: ID!, role: Role!, password: String!): Boolean!
     @isAuthenticated
     @hasRole(roles: [admin])
 }
